@@ -1,4 +1,4 @@
-# Contributing to Trivox
+# Contributing to Trivix
 We welcome contributions to Sonder Space! By contributing to this project, you agree to abide by our [code of conduct](CODE_OF_CONDUCT.md).
 
 ## How to Contribute
