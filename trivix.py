@@ -27,16 +27,13 @@ hist, edges = np.histogram(data, bins=20)
 X_train, X_test, y_train, y_test = train_test_split(data, labels, test_size=0.2, random_state=0)
 regressor = LinearRegression()
 regressor.fit(X_train, y_train)
-
+dump(regressor, 'model/regressor.joblib')
 
 while True:
     y = float(input())
     # predict percentage and ideal time
-    for i in range(1, 101):
-        y.append(i / 100.0)
     y = np.array(y).reshape(-1,1)
     y_pred = regressor.predict(y)
     print(y_pred)
     print(kmeans.predict(y))
-    x = float(input())
     # x is the input that I tell if the code run correctly to the data. If it's not, it should be train again. So write me a code below for that
