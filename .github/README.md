@@ -39,8 +39,8 @@ To use Trivix, you must have the following installed
 - Pandas 
 - Aiohttp
 - Requests
-- Scikit Learn
 - Joblib
+- Tensorflow
 
 ### Getting Started
 1. Clone the repository from GitHub:

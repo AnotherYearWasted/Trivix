@@ -1,39 +1,36 @@
 #%%
 import pandas as pd
 import numpy as np
-from sklearn.cluster import KMeans
-from sklearn.linear_model import LinearRegression
-from sklearn.model_selection import train_test_split
-from joblib import dump, load
-import getdata
+import joblib
+from keras.models import Sequential
+from keras.layers import Dense
+from api.market import *
 pd.set_option('display.max_rows', None)
+import time
 
-#%%
-# load the data
-data = pd.read_csv('data/candles/1m.csv')
-data['percentage'] = data['close'] / data['open'] - 1
-data = data['percentage'] * 100
-print(data)
-data = data.values.reshape(-1, 1)
-#%%
-# perform clustering
-kmeans = KMeans(n_clusters=30, random_state=0, n_init=10).fit(data)
-labels = kmeans.labels_
+# %%
+model = joblib.load('model/short/1m/BTCUSDT')
+df = pd.DataFrame(futures_klines('BTCUSDT', '1m', limit=20))
+df.columns = [
+    'timestamp', 
+    'open', 
+    'high', 
+    'low', 
+    'close', 
+    'volume', 
+    'close time', 
+    'Quote assest volume', 
+    'Number of Trades', 
+    'Taker BAV', 
+    'Taker QAV', 
+    'Unused field'
+]
+df = df[['open', 'high', 'low', 'close', 'volume']]
+arr = []
+for i in range(1, 2):
+    df['bars'] = i
+    arr.append(df.astype(np.float32).to_numpy())
 
-# calculate frequency
-hist, edges = np.histogram(data, bins=20)
+print(df)
 
-# train linear regression model
-X_train, X_test, y_train, y_test = train_test_split(data, labels, test_size=0.2, random_state=0)
-regressor = LinearRegression()
-regressor.fit(X_train, y_train)
-dump(regressor, 'model/regressor.joblib')
-
-while True:
-    y = float(input())
-    # predict percentage and ideal time
-    y = np.array(y).reshape(-1,1)
-    y_pred = regressor.predict(y)
-    print(y_pred)
-    print(kmeans.predict(y))
-    # x is the input that I tell if the code run correctly to the data. If it's not, it should be train again. So write me a code below for that
+print(model.predict(np.array(arr)))

@@ -11,7 +11,7 @@ FUTURES_API_URL = 'https://fapi.binance.com/fapi/v1'
 
 # %%
 
-def futures_klines(symbol: Union[str, list[str]], interval: str, startTime=None, endTime=None, limit=500, asynchronous=False) -> Union[list[list], list[list[list]]]:
+def futures_klines(symbol: Union[str, list[str]], interval: Union[str, list[str]], startTime=None, endTime=None, limit=500, asynchronous=False):
     url = FUTURES_API_URL + '/klines'
     if not asynchronous:
         if (startTime): startTime = int(startTime * 1000)
@@ -45,13 +45,14 @@ def futures_klines(symbol: Union[str, list[str]], interval: str, startTime=None,
                         URL = url + '?' + urlencode(params)
                         tasks.append(asyncio.create_task(session.get(URL, ssl=False)))
                 responses = await asyncio.gather(*tasks)
+                print('gathered')
                 for response in responses:
                     ret.append(await response.json())
+                print('done')
             return ret
         return asyncio.run(get_klines(symbol, interval, startTime, endTime, limit))
-
 # %%
-def futures_continuousklines(pair: Union[str, list[str]], contractType: str, interval: str, startTime=None, endTime=None, limit=500, asynchronous=False) -> Union[list[list], list[list[list]]]:
+def futures_continuousklines(pair: Union[str, list[str]], contractType: str, interval: Union[str, list[str]], startTime=None, endTime=None, limit=500, asynchronous=False):
     url = FUTURES_API_URL + '/continuousKlines'
     if not asynchronous:
         if (startTime): startTime = int(startTime * 1000)
@@ -167,3 +168,14 @@ def futures_open_interest_statistics(symbol: Union[str, list[str]], period: str,
                     ret.append(await response.json())
             return ret
         return asyncio.run(get_klines(symbol, period, startTime, endTime, limit))
+
+#%%
+def futures_exchange_information(type : Union[str('SYMBOL'), None]) -> Union[list, dict]:
+    url = FUTURES_API_URL + '/exchangeInfo'
+    response = requests.get(url).json()
+    if type == 'SYMBOL':
+        ret = []
+        for pos in response['symbols']:
+            ret.append(pos['symbol'])
+        return ret
+    else: return response
