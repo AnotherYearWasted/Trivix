@@ -5,12 +5,19 @@ import joblib
 from keras.models import Sequential
 from keras.layers import Dense
 from api.market import *
+import tensorflow as tf
 pd.set_option('display.max_rows', None)
 import time
-
 # %%
-model = joblib.load('model/short/1m/BTCUSDT')
-df = pd.DataFrame(futures_klines('BTCUSDT', '1m', limit=20))
+
+
+def percent_loss(y_true, y_pred):
+    diff = tf.abs(y_true - y_pred) / tf.abs(y_true)
+    return 100.0 * tf.reduce_mean(diff)
+
+model = joblib.load('model/short/5m/FOOTBALLUSDT')
+general_model = joblib.load('model/short/5m/model')
+df = pd.DataFrame(futures_klines('FOOTBALLUSDT', '5m', limit=30))
 df.columns = [
     'timestamp', 
     'open', 
@@ -26,6 +33,7 @@ df.columns = [
     'Unused field'
 ]
 df = df[['open', 'high', 'low', 'close', 'volume']]
+df = df.iloc[:20]
 arr = []
 for i in range(1, 2):
     df['bars'] = i
@@ -33,4 +41,7 @@ for i in range(1, 2):
 
 print(df)
 
-print(model.predict(np.array(arr)))
+x = model.predict(np.array(arr))
+y = general_model.predict(np.array(arr))
+
+print(x, y, (x + y) / 2)
