@@ -7,17 +7,20 @@ from keras.layers import Dense
 from api.market import *
 import tensorflow as tf
 pd.set_option('display.max_rows', None)
+np.set_printoptions(threshold=np.inf)
 import time
 # %%
 
+def extract_data(arr):
+    min_val = np.min(arr, axis=0)
+    max_val = np.max(arr, axis=0)
+    arr = (arr - min_val) / (max_val - min_val)
+    return arr
 
-def percent_loss(y_true, y_pred):
-    diff = tf.abs(y_true - y_pred) / tf.abs(y_true)
-    return 100.0 * tf.reduce_mean(diff)
-
-model = joblib.load('model/short/5m/FOOTBALLUSDT')
-general_model = joblib.load('model/short/5m/model')
-df = pd.DataFrame(futures_klines('FOOTBALLUSDT', '5m', limit=30))
+symbol = 'DOGEUSDT'
+model = joblib.load('model/short/5m/' + symbol)
+df = pd.DataFrame(futures_klines(symbol, '5m', limit=500))
+df1 = pd.DataFrame(futures_long_short_ratio(symbol, '5m', limit=500))
 df.columns = [
     'timestamp', 
     'open', 
@@ -32,16 +35,21 @@ df.columns = [
     'Taker QAV', 
     'Unused field'
 ]
-df = df[['open', 'high', 'low', 'close', 'volume']]
-df = df.iloc[:20]
-arr = []
-for i in range(1, 2):
-    df['bars'] = i
-    arr.append(df.astype(np.float32).to_numpy())
+df1.columns = [
+    'timestamp',
+    'ratio'
+]
+df['ratio'] = df1['ratio']
+arr = df[['open', 'high', 'low', 'close', 'volume', 'ratio']].to_numpy()
 
-print(df)
+Xtest = []
+for i in range(0, 481):
+    Xtest.append(arr[i : i + 20])
+Xtest = np.array(Xtest)
+y_pred = model.predict(extract_data(Xtest.astype(float)))
 
-x = model.predict(np.array(arr))
-y = general_model.predict(np.array(arr))
-
-print(x, y, (x + y) / 2)
+df1['timestamp'] = pd.to_datetime(df1['timestamp'] + 1000 * 7 * 60 * 60 + 300, unit='ms')
+df1['timestamp'] = df1['timestamp'].dt.strftime('%Y-%m-%d %H:%M:%S')
+for i in range(0, len(y_pred)):
+    print(y_pred[i], df1.iloc[i + 19]['timestamp'])
+print(len(y_pred))

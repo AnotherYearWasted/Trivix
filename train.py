@@ -1,89 +1,83 @@
 #%%
 import pandas as pd
 import numpy as np
+import keras.metrics
 import keras.losses
 from keras.models import Sequential
 from keras.layers import Dense, LSTM
+from keras.optimizers import SGD
 import joblib
+from sklearn.model_selection import train_test_split
 from api.market import *
 pd.set_option('display.max_rows', None)
-import time 
-import tensorflow as tf
+import time
 
-#%%
+# %%
+def extract_data(arr):
+    min_val = np.min(arr, axis=0)
+    max_val = np.max(arr, axis=0)
+    arr = (arr - min_val) / (max_val - min_val)
+    return arr
 
-def percent_loss(y_true, y_pred):
-    diff = tf.abs(y_true - y_pred) / tf.abs(y_true)
-    return 100.0 * tf.reduce_mean(diff)
+# %%
+def train_model(Xtrain, Xtest, ytrain, ytest, symbol, tp):
+    CLS = 3 # Up, Down, Sideway
+    ytrain = np.eye(CLS)[ytrain.astype(int)]
+    ytest = np.eye(CLS)[ytest.astype(int)]
+    model = Sequential()
+    model.add(LSTM(128, input_shape=(20, 6,), activation='tanh'))
+    model.add(Dense(CLS, activation='softmax'))
+    sgd = SGD(learning_rate=0.01, momentum=0.9, nesterov=True)
+    model.compile(
+        optimizer="rmsprop",
+        loss="categorical_crossentropy",
+        metrics=["categorical_accuracy"],
+    )
+    model.fit(Xtrain, ytrain, epochs=10, batch_size=32)
+    y_pred = model.predict(Xtest)
+    predict_labels = np.argmax(y_pred, axis=1)
+    joblib.dump(model, 'model/short/5m/' + symbol)
+    
+    
 
-intervals = [
-    # (60, '1m', 1500),
-    (300, '5m', 500),
-    # (900, '15m', 100),
-    # (86400, '1d', 10),
-]
-try:
-    symbols = pd.read_csv('data/symbols.csv')
-except:
-    symbols = futures_exchange_information('SYMBOL')
-    symbols = pd.DataFrame(symbols, columns='symbol')
-    symbols.to_csv('data/symbols.csv')
-symbols = symbols['symbol'].to_list()
-symbols = ['FOOTBALLUSDT', 'BTCUSDT', 'DARUSDT']
-try:
-    general_model = joblib.load('model/short/5m/model')
-    print('loaded general_model successfully')
-except:
-    general_model = Sequential()
-    general_model.add(LSTM(64, input_shape=(20, 6), activation='relu'))
-    general_model.add(Dense(32, activation='relu'))
-    general_model.add(Dense(1, activation='linear'))
-    general_model.compile(loss=percent_loss, optimizer='adam')
-
-x_train = np.zeros((0, 20, 6))
-y_train = np.zeros((0))
-
-for symbol in symbols:
-    for interval in intervals:
-        print('Processing for', symbol, 'with interval', interval)
-        data = pd.read_csv('data/candles/' + interval[1] + '/' + symbol + '.csv')
-        df = data[['open', 'high', 'low', 'close', 'volume']]
-        try:
-            model = joblib.load('model/short/5m/' + symbol)
-            print('loaded model successfully for', symbol)
-        except:
-            model = Sequential()
-            model.add(LSTM(64, input_shape=(20, 6), activation='relu'))
-            model.add(Dense(32, activation='relu'))
-            model.add(Dense(1, activation='linear'))
-            model.compile(loss=percent_loss, optimizer='adam')
-        matrices = []
-        labels = []
-        for i in range(len(df) - 39):
-            slice_df = df.iloc[i : i + 20].copy()
-            close = float(df.iloc[i + 19]['close'])
-            maxx = 0
-            for j in range(0, 20):
-                slice_df['bars'] = j + 1
-                maxx = max(maxx, float(df.iloc[i + 20 + j]['high']))
-                low = df.iloc[i + 20 + j]['low']
-                risk = maxx / close * 100 - 100
-                labels.append(low)
-                matrices.append(slice_df.to_numpy())
-        X = np.array(matrices)
-        labels = np.array(labels)
-        print('data sucessfully processed')
-        starttime = time.time()
-        model.fit(X, labels, epochs=30, batch_size=20)
-        joblib.dump(model, 'model/short/5m/' + symbol)
-        x_train = np.concatenate((x_train, X))
-        y_train = np.concatenate((y_train, labels))
-        endtime = time.time()
-        print('Time elapsed:', endtime - starttime)
-
-print(x_train.shape, y_train.shape)
-starttime = time.time()
-general_model.fit(x_train, y_train, epochs=30, batch_size=32)
-endtime = time.time()
-print('Time elapsed:', endtime - starttime)
-joblib.dump(general_model, 'model/short/5m/model')
+# %%
+def analyze_data(symbol):
+    df = pd.read_csv(DIR + symbol + '.csv')
+    tp = df['timestamp'].to_numpy()
+    df = df[['open', 'high', 'low', 'close', 'volume', 'ratio']]
+    arr = df.to_numpy()
+    arr1 = extract_data(arr)
+    input = []
+    output = []
+    TP = []
+    cnt = 0
+    for i in range(0, len(arr) - 40):
+        input.append(arr1[i : i + 20])
+        TP.append(tp[i])
+        maxx = 0
+        minn = 1e9
+        current = arr[i + 19][3]
+        if (current == 0): exit()
+        trend = 0
+        for j in range(i + 20, i + 40):
+            minn = min(minn, arr[j][2])
+            maxx = max(maxx, arr[j][1])
+            if (1.0 - minn / current > 0.015):
+                trend = -1
+                break
+            if (maxx / current - 1 > 0.015):
+                trend = 1
+                break
+        output.append(trend + 1)
+    input = np.array(input) 
+    output = np.array(output)
+    Xtrain, Xtest, ytrain, ytest = train_test_split(input, output, test_size=0.2, random_state=0)
+    train_model(Xtrain, Xtest, ytrain, ytest, symbol, TP[len(ytrain) : ])
+# %%
+DIR = 'data/candles/5m/'
+symbols = futures_exchange_information("SYMBOL")
+print(symbols)
+if __name__ == '__main__':
+    import multiprocessing
+    with multiprocessing.Pool() as pool:
+        pool.starmap(analyze_data,  [(symbol,) for symbol in symbols], chunksize=8)

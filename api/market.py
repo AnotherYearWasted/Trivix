@@ -128,10 +128,8 @@ def futures_open_interest(symbol: Union[str, list[str]]) -> Union[dict, list[dic
         return asyncio.run(get_open_interest(symbol))
 
 # %%
-
-
 def futures_open_interest_statistics(symbol: Union[str, list[str]], period: str, startTime=None, endTime=None, limit=30, asynchronous=False) -> Union[list[list], list[list[list]]]:
-    url = FUTURES_API_URL + '/openInterestHist'
+    url = 'https://fapi.binance.com/futures/data/openInterestHist'
     if not asynchronous:
         if (startTime): startTime = int(startTime * 1000)
         if (endTime) : endTime = int(endTime * 1000)
@@ -179,3 +177,43 @@ def futures_exchange_information(type : Union[str('SYMBOL'), None]) -> Union[lis
             ret.append(pos['symbol'])
         return ret
     else: return response
+
+# %%
+def futures_long_short_ratio(symbol: Union[str, list[str]], period: str, limit=30, asynchronous=False) -> Union[list[list], list[list[list]]]:
+    url = 'https://fapi.binance.com/futures/data/globalLongShortAccountRatio'
+    if not asynchronous:
+        params = {
+            'symbol' : symbol,
+            'period' : period,
+            'limit' : limit
+        }
+        response = requests.get(url, params=params).json()
+        ret = []
+        for item in response:
+            ret.append([item['timestamp'], item['longShortRatio']])
+        return ret
+    else:
+        ret = []
+        def to_list(response):
+            res = []
+            for item in response:
+                res.append([item['timestamp'], item['longShortRatio']])
+            return res
+        # Asynchronous API call
+        async def get_klines(symbols, periods, limit):
+            async with aiohttp.ClientSession(trust_env=True) as session:
+                tasks = []
+                for symbol in symbols:
+                    for period in periods:
+                        params = {
+                            'symbol' : symbol,
+                            'period' : period,
+                            'limit' : limit
+                        }
+                        URL = url + '?' + urlencode(params)
+                        tasks.append(asyncio.create_task(session.get(URL, ssl=False)))
+                responses = await asyncio.gather(*tasks)
+                for response in responses:
+                    ret.append(to_list(await response.json()))
+            return ret
+        return asyncio.run(get_klines(symbol, period, limit))
