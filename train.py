@@ -14,6 +14,7 @@ import time
 
 # %%
 def extract_data(arr):
+    arr = arr * 1e7
     min_val = np.min(arr, axis=0)
     max_val = np.max(arr, axis=0)
     arr = (arr - min_val) / (max_val - min_val)
@@ -21,11 +22,11 @@ def extract_data(arr):
 
 # %%
 def train_model(Xtrain, Xtest, ytrain, ytest, symbol, tp):
-    CLS = 3 # Up, Down, Sideway
+    CLS = 3 # Up, Sideway, down
     ytrain = np.eye(CLS)[ytrain.astype(int)]
     ytest = np.eye(CLS)[ytest.astype(int)]
     model = Sequential()
-    model.add(LSTM(128, input_shape=(20, 6,), activation='tanh'))
+    model.add(LSTM(128, input_shape=(60, 6,), activation='tanh'))
     model.add(Dense(CLS, activation='softmax'))
     sgd = SGD(learning_rate=0.01, momentum=0.9, nesterov=True)
     model.compile(
@@ -37,8 +38,6 @@ def train_model(Xtrain, Xtest, ytrain, ytest, symbol, tp):
     y_pred = model.predict(Xtest)
     predict_labels = np.argmax(y_pred, axis=1)
     joblib.dump(model, 'model/short/5m/' + symbol)
-    
-    
 
 # %%
 def analyze_data(symbol):
@@ -50,26 +49,28 @@ def analyze_data(symbol):
     input = []
     output = []
     TP = []
-    cnt = 0
-    for i in range(0, len(arr) - 40):
-        input.append(arr1[i : i + 20])
+    cnt = [0, 0, 0]
+    for i in range(0, len(arr) - 80):
+        input.append(arr1[i : i + 60])
         TP.append(tp[i])
         maxx = 0
         minn = 1e9
-        current = arr[i + 19][3]
+        current = arr[i + 59][3]
         if (current == 0): exit()
         trend = 0
-        for j in range(i + 20, i + 40):
+        for j in range(i + 60, i + 80):
             minn = min(minn, arr[j][2])
             maxx = max(maxx, arr[j][1])
-            if (1.0 - minn / current > 0.015):
+            if (1.0 - minn / current > 0.01):
                 trend = -1
                 break
-            if (maxx / current - 1 > 0.015):
+            if (maxx / current - 1 > 0.01):
                 trend = 1
                 break
+        cnt[trend + 1] += 1
         output.append(trend + 1)
     input = np.array(input) 
+    print(cnt)
     output = np.array(output)
     Xtrain, Xtest, ytrain, ytest = train_test_split(input, output, test_size=0.2, random_state=0)
     train_model(Xtrain, Xtest, ytrain, ytest, symbol, TP[len(ytrain) : ])
@@ -80,4 +81,4 @@ print(symbols)
 if __name__ == '__main__':
     import multiprocessing
     with multiprocessing.Pool() as pool:
-        pool.starmap(analyze_data,  [(symbol,) for symbol in symbols], chunksize=8)
+        pool.starmap(analyze_data,  [(symbol,) for symbol in symbols])
