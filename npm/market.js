@@ -3,6 +3,9 @@ const axios = require('axios');
 let url = 'https://fapi.binance.com/fapi/v1/'; // Replace with your API endpoint
 
 // Function to fetch data
+/**
+ * Get current exchange trading rules and symbol information
+ */
 async function exchangeInfo(){
     try {
         let URL = url + 'exchangeInfo'
@@ -23,6 +26,13 @@ async function exchangeInfo(){
     }
 }
 
+/**
+ * @param {string} symbol - required
+ * @param {string} interval - required, 1m, 3m, 5m, 15m, 30m, 1h, 2h, 4h, 6h, 8h, 12h, 1d, 3d, 1w, 1M
+ * @param {number} limit - not required, default 500, max 1000
+ * @param {number} startTime - not required
+ * @param {number} endTime - not required
+ */
 async function klines(symbol, interval, limit = 500, startTime = null, endTime = null){
     try {
         let URL = url + 'klines'
@@ -51,6 +61,13 @@ async function klines(symbol, interval, limit = 500, startTime = null, endTime =
     }
 }
 
+/**
+ * @param {string} symbol - required
+ * @param {string} interval - required, 1m, 3m, 5m, 15m, 30m, 1h, 2h, 4h, 6h, 8h, 12h, 1d
+ * @param {number} limit - not required, default 500, max 1000
+ * @param {number} startTime - not required
+ * @param {number} endTime - not required
+ */
 async function markPriceKlines(symbol, interval, limit = 500, startTime = null, endTime = null){
     try {
         let URL = url + 'markPriceKlines'
@@ -79,6 +96,12 @@ async function markPriceKlines(symbol, interval, limit = 500, startTime = null, 
     }
 }
 
+/**
+ * @param {string} symbol - required
+ * @param {number} limit - not required, default 100, max 1000 
+ * @param {number} startTime - not required
+ * @param {number} endTime - not required
+ */
 async function fundingRate(symbol=null, limit=100, startTime=null, endTime=null){
     try {
         let URL = url + 'fundingRate'
@@ -106,6 +129,9 @@ async function fundingRate(symbol=null, limit=100, startTime=null, endTime=null)
     }
 }
 
+/**
+ * @param {*} symbol - not required
+ */
 async function ticker24h(symbol=null){
     try {
         let URL = url + 'ticker/24hr'
@@ -130,6 +156,10 @@ async function ticker24h(symbol=null){
     }
 }
 
+/**
+ * 
+ * @param {string} symbol - not required 
+ */
 async function tickerprice(symbol=null){
     try {
         let URL = url + 'ticker/price'
@@ -155,7 +185,6 @@ async function tickerprice(symbol=null){
 }
 
 /**
- * 
  * @param {null|string} symbol - not required
  */
 async function tickerbookticker(symbol=null){

@@ -4,8 +4,14 @@ const app = express()
 
 const port = 2210
 
-app.get('/', (req, res) => {
-    res.send('Hello World!')
+app.get('/', async (req, res) => {
+    await res.send('Hello World!')
+});
+
+app.get('/exchangeInfo', async (req, res) => {
+    await market.exchangeInfo().then((result) => {
+        res.send(result)
+    })
 });
 
 app.listen(port, () => {

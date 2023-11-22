@@ -6,7 +6,7 @@ from keras.models import Sequential
 from keras.layers import Dense, LSTM
 from keras.optimizers import SGD
 import joblib
-from api.market import *
+from py.market import *
 # Load data
 print(futures_open_interest_statistics('BTCUSDT', '5m', limit=500))
 #%%
