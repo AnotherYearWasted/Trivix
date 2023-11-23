@@ -1,1 +1,0 @@
-nohup python3 py/wss.py > log.txt &

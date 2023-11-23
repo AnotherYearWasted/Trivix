@@ -76,7 +76,7 @@ def on_message(data):
         stack[symbol]['total_liq_quantity'] += float(original_quantity)
         if current_minute != stack[symbol]['time']:
             # Write data to csv file
-            with open(f'data/candles/1m/{symbol}.csv', 'a+', newline='') as file:
+            with open(f'data/orders/1m/{symbol}.csv', 'a+', newline='') as file:
                 writer = csv.writer(file)
                 writer.writerow([
                     current_minute * 60,
@@ -106,7 +106,7 @@ def on_message(data):
         stack[symbol]['total_order_count'] += 1
         if current_minute != stack[symbol]['time']:
             # Write data to csv file
-            with open(f'data/candles/1m/{symbol}.csv', 'a+', newline='') as file:
+            with open(f'data/orders/1m/{symbol}.csv', 'a+', newline='') as file:
                 writer = csv.writer(file)
                 writer.writerow([
                     current_minute * 60, 

@@ -17,9 +17,11 @@ async function exchangeInfo(){
                 'Content-Type': 'application/json',
             },
         }
+        //return data to the function
         const response = await axios.request(config).then((response) => {
-            console.log(response.data);
+            return response.data;
         });
+        return response;
     }
     catch (error) {
         console.error('Error fetching data:', error.message);
@@ -33,6 +35,8 @@ async function exchangeInfo(){
  * @param {number} startTime - not required
  * @param {number} endTime - not required
  */
+
+
 async function klines(symbol, interval, limit = 500, startTime = null, endTime = null){
     try {
         let URL = url + 'klines'
@@ -52,9 +56,9 @@ async function klines(symbol, interval, limit = 500, startTime = null, endTime =
             }
         }
         const response = await axios.request(config).then((response) => {
-            console.log(response.data);
-            console.log("Last updated: " + new Date().toLocaleString());
+            return response.data;
         });
+        return response;
     }
     catch (error) {
         console.error('Error fetching data:', error.message, error.response.data);
@@ -413,3 +417,18 @@ async function takerlongshortRatio(symbol, period, limit=30, startTime=null, end
 }
 
 console.log('Market function loaded.')
+module.exports = {
+    exchangeInfo,
+    klines,
+    markPriceKlines,
+    fundingRate,
+    ticker24h,
+    tickerprice,
+    tickerbookticker,
+    openInterest,
+    openInterestHist,
+    topLongShortAccountRatio,
+    topLongShortPositionRatio,
+    globalLongShortAccountRatio,
+    takerlongshortRatio
+}

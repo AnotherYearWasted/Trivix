@@ -1,12 +1,12 @@
 # %%
-from py.market import *
+from market import *
 import pandas as pd
 import time
 
 #%%
 intervals = [
-    #(60, '1m', 1500),
-    (300, '5m', 500),
+    (60, '1m', 1500),
+    #(300, '5m', 500),
     #(900, '15m', 100),
     #(86400, '1d', 10),
 ]
@@ -54,7 +54,7 @@ def pre_processing():
                 except:
                     df['ratio'] = 0
                 try:
-                    lastdf = pd.read_csv('data/candles/' + periods[j] + '/' + symbols[i] + '.csv')
+                    lastdf = pd.read_csv('data/orders/' + periods[j] + '/' + symbols[i] + '.csv')
                 except:
                     lastdf = df
                 lastdf = lastdf[lastdf['timestamp'] < df.iloc[0]['timestamp']]
