@@ -1,6 +1,6 @@
 const axios = require('axios');
 
-let url = 'https://fapi.binance.com/fapi/v1/'; // Replace with your API endpoint
+let url = 'https://fapi.binance.com'; // Replace with your API endpoint
 
 // Function to fetch data
 /**
@@ -8,7 +8,7 @@ let url = 'https://fapi.binance.com/fapi/v1/'; // Replace with your API endpoint
  */
 async function exchangeInfo(){
     try {
-        let URL = url + 'exchangeInfo'
+        let URL = url + '/fapi/v1/exchangeInfo'
         let config = {
             method: 'get',
             maxBodyLength: Infinity,
@@ -39,7 +39,7 @@ async function exchangeInfo(){
 
 async function klines(symbol, interval, limit = 500, startTime = null, endTime = null){
     try {
-        let URL = url + 'klines'
+        let URL = url + '/fapi/v1/klines'
         let config = {
             method: 'get',
             maxBodyLength: Infinity,
@@ -74,7 +74,7 @@ async function klines(symbol, interval, limit = 500, startTime = null, endTime =
  */
 async function markPriceKlines(symbol, interval, limit = 500, startTime = null, endTime = null){
     try {
-        let URL = url + 'markPriceKlines'
+        let URL = url + '/fapi/v1/markPriceKlines'
         let config = {
             method: 'get',
             maxBodyLength: Infinity,
@@ -91,9 +91,9 @@ async function markPriceKlines(symbol, interval, limit = 500, startTime = null, 
             }
         }
         const response = await axios.request(config).then((response) => {
-            console.log(response.data);
-            console.log("Last updated: " + new Date().toLocaleString());
+            return response.data
         });
+        return response
     }
     catch{
         console.error('Error fetching data:', error.message, error.response.data);
@@ -108,7 +108,7 @@ async function markPriceKlines(symbol, interval, limit = 500, startTime = null, 
  */
 async function fundingRate(symbol=null, limit=100, startTime=null, endTime=null){
     try {
-        let URL = url + 'fundingRate'
+        let URL = url + '/fapi/v1/fundingRate'
         let config = {
             method: 'get',
             maxBodyLength: Infinity,
@@ -124,9 +124,9 @@ async function fundingRate(symbol=null, limit=100, startTime=null, endTime=null)
             }
         }
         const response = await axios.request(config).then((response) => {
-            console.log(response.data);
-            console.log("Last updated: " + new Date().toLocaleString());
+            return response.data
         });
+        return response
     }
     catch{
         console.error('Error fetching data:', error.message, error.response.data);
@@ -138,7 +138,7 @@ async function fundingRate(symbol=null, limit=100, startTime=null, endTime=null)
  */
 async function ticker24h(symbol=null){
     try {
-        let URL = url + 'ticker/24hr'
+        let URL = url + '/fapi/v1/ticker/24hr'
         let config = {
             method: 'get',
             maxBodyLength: Infinity,
@@ -151,9 +151,9 @@ async function ticker24h(symbol=null){
             }
         }
         const response = await axios.request(config).then((response) => {
-            console.log(response.data);
-            console.log("Last updated: " + new Date().toLocaleString());
+            return response.data
         });
+        return response
     }
     catch{
         console.error('Error fetching data:', error.message, error.response.data);
@@ -166,7 +166,7 @@ async function ticker24h(symbol=null){
  */
 async function tickerprice(symbol=null){
     try {
-        let URL = url + 'ticker/price'
+        let URL = url + '/fapi/v1/ticker/price'
         let config = {
             method: 'get',
             maxBodyLength: Infinity,
@@ -179,9 +179,9 @@ async function tickerprice(symbol=null){
             }
         }
         const response = await axios.request(config).then((response) => {
-            console.log(response.data);
-            console.log("Last updated: " + new Date().toLocaleString());
+            return response.data
         });
+        return response
     }
     catch {
         console.error('Error fetching data:', error.message, error.response.data);
@@ -193,7 +193,7 @@ async function tickerprice(symbol=null){
  */
 async function tickerbookticker(symbol=null){
     try {
-        let URL = url + 'ticker/bookTicker'
+        let URL = url + '/fapi/v1/ticker/bookTicker'
         let config = {
             method: 'get',
             maxBodyLength: Infinity,
@@ -206,9 +206,9 @@ async function tickerbookticker(symbol=null){
             }
         }
         const response = await axios.request(config).then((response) => {
-            console.log(response.data);
-            console.log("Last updated: " + new Date().toLocaleString());
+            return response.data
         });
+        return response
     }
     catch {
         console.error('Error fetching data:', error.message, error.response.data);
@@ -216,11 +216,11 @@ async function tickerbookticker(symbol=null){
 }
 
 /**
- * @param {null|string} symbol - not required
+ * @param {string} symbol - required
  */
 async function openInterest(symbol){
     try {
-        let URL = url + 'openInterest'
+        let URL = url + '/fapi/v1/openInterest'
         let config = {
             method: 'get',
             maxBodyLength: Infinity,
@@ -233,9 +233,9 @@ async function openInterest(symbol){
             }
         }
         const response = await axios.request(config).then((response) => {
-            console.log(response.data);
-            console.log("Last updated: " + new Date().toLocaleString());
+            return response.data;
         });
+        return response;
     }
     catch {
         console.error('Error fetching data:', error.message, error.response.data);
@@ -252,7 +252,7 @@ async function openInterest(symbol){
 
 async function openInterestHist(symbol, period, limit=30, startTime=null, endTime=null){
     try {
-        let URL = url + 'openInterestHist'
+        let URL = url + '/futures/data/openInterestHist'
         let config = {
             method: 'get',
             maxBodyLength: Infinity,
@@ -269,9 +269,9 @@ async function openInterestHist(symbol, period, limit=30, startTime=null, endTim
             }
         }
         const response = await axios.request(config).then((response) => {
-            console.log(response.data);
-            console.log("Last updated: " + new Date().toLocaleString());
+            return response.data
         });
+        return response
     }
     catch {
         console.error('Error fetching data:', error.message, error.response.data);
@@ -287,7 +287,7 @@ async function openInterestHist(symbol, period, limit=30, startTime=null, endTim
  */
 async function topLongShortAccountRatio(symbol, period, limit=30, startTime=null, endTime=null){
     try {
-        let URL = url + 'topLongShortAccountRatio'
+        let URL = url + '/futures/data/topLongShortAccountRatio'
         let config = {
             method: 'get',
             maxBodyLength: Infinity,
@@ -304,9 +304,9 @@ async function topLongShortAccountRatio(symbol, period, limit=30, startTime=null
             }
         }
         const response = await axios.request(config).then((response) => {
-            console.log(response.data);
-            console.log("Last updated: " + new Date().toLocaleString());
+            return response.data
         });
+        return response
     }
     catch {
         console.error('Error fetching data:', error.message, error.response.data);
@@ -322,7 +322,7 @@ async function topLongShortAccountRatio(symbol, period, limit=30, startTime=null
  */
 async function topLongShortPositionRatio(symbol, period, limit=30, startTime=null, endTime=null){
     try {
-        let URL = url + 'topLongShortPositionRatio'
+        let URL = url + '/futures/data/topLongShortPositionRatio'
         let config = {
             method: 'get',
             maxBodyLength: Infinity,
@@ -339,9 +339,9 @@ async function topLongShortPositionRatio(symbol, period, limit=30, startTime=nul
             }
         }
         const response = await axios.request(config).then((response) => {
-            console.log(response.data);
-            console.log("Last updated: " + new Date().toLocaleString());
+            return response.data
         });
+        return response
     }
     catch {
         console.error('Error fetching data:', error.message, error.response.data);
@@ -357,7 +357,7 @@ async function topLongShortPositionRatio(symbol, period, limit=30, startTime=nul
  */
 async function globalLongShortAccountRatio(symbol, period, limit=30, startTime=null, endTime=null){
     try {
-        let URL = url + 'globalLongShortAccountRatio'
+        let URL = url + '/futures/data/globalLongShortAccountRatio'
         let config = {
             method: 'get',
             maxBodyLength: Infinity,
@@ -374,8 +374,9 @@ async function globalLongShortAccountRatio(symbol, period, limit=30, startTime=n
             }
         }
         const response = await axios.request(config).then((response) => {
-            console.log(response.data);
+            return response.data;
         });
+        return response;
     }
     catch {
         console.error('Error fetching data:', error.message, error.response.data);
@@ -391,7 +392,7 @@ async function globalLongShortAccountRatio(symbol, period, limit=30, startTime=n
  */
 async function takerlongshortRatio(symbol, period, limit=30, startTime=null, endTime=null){
     try {
-        let URL = url + 'takerlongshortRatio'
+        let URL = url + '/futures/data/takerlongshortRatio'
         let config = {
             method: 'get',
             maxBodyLength: Infinity,
@@ -408,8 +409,9 @@ async function takerlongshortRatio(symbol, period, limit=30, startTime=null, end
             }
         }
         const response = await axios.request(config).then((response) => {
-            console.log(response.data);
+            return response
         });
+        return response
     }
     catch {
         console.error('Error fetching data:', error.message, error.response.data);
@@ -417,6 +419,7 @@ async function takerlongshortRatio(symbol, period, limit=30, startTime=null, end
 }
 
 console.log('Market function loaded.')
+
 module.exports = {
     exchangeInfo,
     klines,

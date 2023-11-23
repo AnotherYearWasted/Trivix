@@ -109,7 +109,7 @@ def on_message(data):
             with open(f'data/orders/1m/{symbol}.csv', 'a+', newline='') as file:
                 writer = csv.writer(file)
                 writer.writerow([
-                    current_minute * 60, 
+                    current_minute * 60000, 
                     stack[symbol]['buy_liq_count'], 
                     stack[symbol]['sell_liq_count'], 
                     stack[symbol]['buy_liq_quantity'], 
