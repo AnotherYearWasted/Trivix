@@ -14,6 +14,10 @@ async function get_long_short_ratio(limit){
                 const takerLongShortRatioPromise = market.takerlongshortRatio(symbol.symbol, '5m', limit=limit);
                 const [topLongShortAccountRatio, topLongShortPositionRatio, globalLongShortAccountRatio, takerLongShortRatio] = await Promise.all([topLongShortAccountRatioPromise, topLongShortPositionRatioPromise, globalLongShortAccountRatioPromise, takerLongShortRatioPromise]);
                 const ws = fs.createWriteStream(`data/long_short_ratio/5m/${symbol.symbol}.csv`, { flags: 'a' });
+                //Create new file for all symbols
+                fs.writeFile(`data/long_short_ratio/5m/${symbol.symbol}.csv`, '', function (err) {
+                    if (err) throw err;
+                });
                 // If the file is new, then write new column names
                 if (fs.statSync(`data/long_short_ratio/5m/${symbol.symbol}.csv`).size == 0){
                     ws.write(`Timestamp,TopRatioAcc,TopLongAcc, TopShortAcc, TopRatioPos, TopLongPos, TopShortPos, GlobalRatioAcc, GlobalLongAcc, GlobalShortAcc, BuySellRatio, BuyVol, SelVol\n`);
@@ -29,4 +33,4 @@ async function get_long_short_ratio(limit){
     })
 }
 get_long_short_ratio(limit=500);
-setInterval(get_long_short_ratio.bind(1), 300000);
+setInterval(() => {get_long_short_ratio(limit=1)}, 300000);

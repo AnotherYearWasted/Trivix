@@ -1,1 +1,0 @@
-nohup python3 -u py/wss.py > orders.txt &

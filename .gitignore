@@ -1,6 +1,7 @@
 .env
 node_modules
-orders.txt
+liquidations.txt
 candles.txt
 longshort.txt
+log.txt
 ```

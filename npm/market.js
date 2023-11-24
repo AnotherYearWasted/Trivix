@@ -418,6 +418,7 @@ async function takerlongshortRatio(symbol, period, limit=30, startTime=null, end
     }
 }
 
+
 console.log('Market function loaded.')
 module.exports = {
     exchangeInfo,

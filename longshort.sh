@@ -1,0 +1,1 @@
+nohup node npm/get_long_short.js > longshort.txt &
