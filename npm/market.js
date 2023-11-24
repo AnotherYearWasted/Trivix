@@ -409,7 +409,7 @@ async function takerlongshortRatio(symbol, period, limit=30, startTime=null, end
             }
         }
         const response = await axios.request(config).then((response) => {
-            return response
+            return response.data
         });
         return response
     }
@@ -419,7 +419,6 @@ async function takerlongshortRatio(symbol, period, limit=30, startTime=null, end
 }
 
 console.log('Market function loaded.')
-
 module.exports = {
     exchangeInfo,
     klines,

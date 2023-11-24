@@ -3,7 +3,7 @@ const { get } = require('http');
 const market = require('./market.js');
 const csv = require('csv-parser');
 
-async function get_klines_and_open_interest_and_long_short_ratio() {
+async function get_klines_and_open_interest() {
     console.log('Getting data...');
     await market.exchangeInfo().then((result) => {
         result.symbols.forEach(async (symbol) => {
@@ -26,4 +26,4 @@ async function get_klines_and_open_interest_and_long_short_ratio() {
     });
 }
 
-setInterval(get_klines_and_open_interest_and_long_short_ratio, 60000);
+setInterval(get_klines_and_open_interest, 60000);
