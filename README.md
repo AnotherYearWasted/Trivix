@@ -25,5 +25,12 @@ $ python3 -m pip install -r py/requirements.txt
 
 ## To run node js, first install required dependencies
 ```bash
-$ npm i npm
+$ npm i
+```
+Javascript scripts are used to collect data
+Run javascript code in background
+```bash
+$ source candles.sh
+$ source longshort.sh
+$ source liquidations.sh
 ```

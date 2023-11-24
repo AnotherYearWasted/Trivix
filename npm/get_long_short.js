@@ -3,6 +3,17 @@ const { get } = require('http');
 const market = require('./market.js');
 const csv = require('csv-parser');
 
+market.exchangeInfo().then((result) => {
+    result.symbols.forEach(async (symbol) => {
+        //Create new file for all symbols
+        fs.writeFile(`data/long_short_ratio/5m/${symbol.symbol}.csv`, '', function (err) {
+            if (err) throw err;
+        });
+        const ws = fs.createWriteStream(`data/long_short_ratio/5m/${symbol.symbol}.csv`, { flags: 'a' });
+        ws.write(`Timestamp,TopRatioAcc,TopLongAcc, TopShortAcc, TopRatioPos, TopLongPos, TopShortPos, GlobalRatioAcc, GlobalLongAcc, GlobalShortAcc, BuySellRatio, BuyVol, SelVol\n`);
+    });
+});
+
 async function get_long_short_ratio(limit){
     console.log('Getting long/short ratio...');
     await market.exchangeInfo().then((result) => {
@@ -14,10 +25,7 @@ async function get_long_short_ratio(limit){
                 const takerLongShortRatioPromise = market.takerlongshortRatio(symbol.symbol, '5m', limit=limit);
                 const [topLongShortAccountRatio, topLongShortPositionRatio, globalLongShortAccountRatio, takerLongShortRatio] = await Promise.all([topLongShortAccountRatioPromise, topLongShortPositionRatioPromise, globalLongShortAccountRatioPromise, takerLongShortRatioPromise]);
                 const ws = fs.createWriteStream(`data/long_short_ratio/5m/${symbol.symbol}.csv`, { flags: 'a' });
-                //Create new file for all symbols
-                fs.writeFile(`data/long_short_ratio/5m/${symbol.symbol}.csv`, '', function (err) {
-                    if (err) throw err;
-                });
+                
                 // If the file is new, then write new column names
                 if (fs.statSync(`data/long_short_ratio/5m/${symbol.symbol}.csv`).size == 0){
                     ws.write(`Timestamp,TopRatioAcc,TopLongAcc, TopShortAcc, TopRatioPos, TopLongPos, TopShortPos, GlobalRatioAcc, GlobalLongAcc, GlobalShortAcc, BuySellRatio, BuyVol, SelVol\n`);
