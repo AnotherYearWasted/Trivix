@@ -34,40 +34,45 @@ The directory structure should look like this:
 ## 3. Installation
 
 ### Requirements
-To use Trivix, you must have the following installed
-- Python 3.x
-- Pandas 
-- Aiohttp
-- Requests
-- Joblib
-- Tensorflow
+Python3 or NodeJS
 
 ### Getting Started
-1. Clone the repository from GitHub:
 ```bash
 $ git clone https://github.com/jaibtdou/Trivix.git
 ```
-2. Install virtual environment (recommended):
+
+Install python3.10
 ```bash
-$ python -m venv env
+$ sudo apt update
+$ sudo apt-get install python3
+$ sudo apt-get install python3-pip
 ```
-3. Activate virtual environment (recommended):
-- For Windows:
-* If you are using powershell (PS)
-```ps
-> env/Scripts/activate.ps1
-```
-* Or using commmand prompt (cmd)
-```cmd
-> env/Scripts/activate.bat
-```
-- For Linux
+
+Install NodeJS
 ```bash
-$ source env/bin/activate
+$ sudo apt update
+$ sudo apt-get install npm 
 ```
-4. Install the required dependencies:
+
+To run python3 virtual environment, first create .env folder and install required dependencies
 ```bash
-$ python -m pip install -r requirements.txt
+$ sudo apt-get install python3.10-venv
+$ python3 -m venv .env
+$ source .env/bin/activate
+$ python3 -m pip install -r py/requirements.txt
+```
+
+To run NodeJS, first install required dependencies
+```bash
+$ npm i
+```
+
+Javascript scripts are used to collect data
+Run javascript code in background
+```bash
+$ source candles.sh
+$ source longshort.sh
+$ source liquidations.sh
 ```
 
 ## 4. Usage

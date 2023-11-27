@@ -22,7 +22,7 @@ market.exchangeInfo().then((result) => {
     ws.on('message', (data) => {
         let json = JSON.parse(data);
         json = json.data.o;
-        console.log(json.s, json.S, json.f, json.T, json.q, json.pm, json.ap, json.l, json.z)
+        console.log(json.s, json.S, json.q, json.p, json.ap)
         const ws = fs.createWriteStream(`data/liquidations/${json.s}.csv`, { flags: 'a' });
         // If the file is new, then write new column names
         if (fs.statSync(`data/liquidations/${json.s}.csv`).size == 0){
