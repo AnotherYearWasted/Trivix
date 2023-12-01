@@ -31,8 +31,23 @@ df_candlestick = pd.read_csv('data/candles/1m/' + csv_file_name)
 
 # Convert timestamp to datetime
 df_candlestick['Timestamp'] = pd.to_datetime(df_candlestick['Open Time'], unit='ms')
+
+
 merged_df = pd.merge(df, df_candlestick, on='Timestamp', how='inner')
 df = merged_df
+df_kill = pd.read_csv('data/liquidations/' + csv_file_name)
+# Liquidation timestamp is random, so we will count the number of liquidation in each 1 minute interval
+df_kill['Timestamp'] = pd.to_datetime(df_kill['Time'], unit='ms')
+df_kill['Timestamp'] = df_kill['Timestamp'].dt.floor('min')
+df_kill = df_kill.groupby('Timestamp').size().reset_index(name='Liquidation')
+df = pd.merge(df, df_kill, on='Timestamp', how='left')
+df['Liquidation'] = df['Liquidation'].fillna(0)
+# Get max value of liquidation
+max_liquidation = df['Liquidation'].max()
+# Divide liquidation by max liquidation to get a ratio
+df['Liquidation'] = df['Liquidation'] / max_liquidation
+# Multiply by max value of volume to get a value that is comparable to volume
+df['Liquidation'] = df['Liquidation'] * df['Volume'].max()
 x_values = df['Timestamp']
 y_values1 = df[' GlobalLongAcc']
 y_values2 = df[' GlobalShortAcc']
@@ -44,7 +59,6 @@ ax1.set_xlabel('Datetime')
 ax1.set_ylabel('Long - Short', color=color)
 ax1.plot(x_values, y_values1 - y_values2, color=color, linestyle='-', marker='o', markersize=3, markerfacecolor='yellow')
 ax1.tick_params(axis='y', labelcolor=color)
-
 ax2 = ax1.twinx()  # instantiate a second axes that shares the same x-axis
 
 color = 'tab:red'
@@ -58,6 +72,9 @@ ax3.set_xlabel('Datetime')
 ax3.set_ylabel('Volume', color=color)
 ax3.plot(x_values, df['Volume'], color=color, linestyle='-', marker='o', markersize=3, markerfacecolor='yellow')
 ax3.tick_params(axis='y', labelcolor=color)
+ax3.plot(x_values, df['Liquidation'], color='tab:orange', linestyle='-', marker='o', markersize=3, markerfacecolor='yellow')
+ax3.tick_params(axis='y', labelcolor=color)
+
 
 ax4 = ax3.twinx()  # instantiate a second axes that shares the same x-axis
 
