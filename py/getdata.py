@@ -1,65 +1,62 @@
-# %%
-from market import *
+import requests
+import json
 import pandas as pd
-import time
+import zipfile
+import datetime, io, os
+from typing import Literal
 
-#%%
-intervals = [
-    (60, '1m', 1500),
-    #(300, '5m', 500),
-    #(900, '15m', 100),
-    #(86400, '1d', 10),
-]
-# try:
-#     asymbols = pd.read_csv('data/symbols.csv')
-# except:
-asymbols = futures_exchange_information('SYMBOL')
-asymbols = pd.DataFrame(asymbols, columns=['symbol'])
-asymbols.to_csv('data/symbols.csv')
-asymbols = asymbols['symbol'].to_list()
+# url may look like this
+# https://data.binance.vision/data/futures/um/daily/markPriceKlines/BTCUSDT/1m/BTCUSDT-1m-2023-12-12.zip
+# Get data daily from the last 30 days
+def get_klines(symbol: str, 
+             date: str, 
+             func: Literal["klines", "markPriceKlines", "premiumIndexKlines", "indexPriceKlines"]
+             ) -> pd.DataFrame:
+    url = f'https://data.binance.vision/data/futures/um/daily/{func}/{symbol}/1m/' + symbol + '-1m-' + date + '.zip'
+    """download content from a url, unzip, and save to a csv file"""
+    r = requests.get(url)
+    print(url)
+    z = zipfile.ZipFile(io.BytesIO(r.content))
+    z.extractall(f'data/{func}/')
+    df = pd.read_csv(f'data/{func}/' + symbol + '-1m-' + date + '.csv')
+    df.to_csv(f'data/{func}/' + symbol + '-1m-' + date + '.csv')
+    # Delete the csv file
+    os.remove(f'data/{func}/' + symbol + '-1m-' + date + '.csv')
+    return df
 
-#%%
-def pre_processing():
-    for i in range(0, len(asymbols), 100):
-        symbols = asymbols[i:min(i + 100, len(asymbols))]
-        periods = []
-        data = []
-        data1 = []
-        for interval in intervals:
-            data.append(futures_klines(symbols, [interval[1]], limit=interval[2], asynchronous=1))
-            data1.append(futures_long_short_ratio(symbols, [interval[1]], limit=interval[2], asynchronous=1))
-            periods.append(interval[1])
-            #time.sleep(60)
-        for j, dat1 in enumerate(data):
-            for i, list in enumerate(dat1):
-                df = pd.DataFrame(list)
-                df.columns = [
-                    'timestamp', 
-                    'open', 
-                    'high', 
-                    'low', 
-                    'close', 
-                    'volume', 
-                    'close time', 
-                    'Quote assest volume', 
-                    'Number of Trades', 
-                    'Taker BAV', 
-                    'Taker QAV', 
-                    'Unused field'
-                ]
-                try:
-                    df1 = pd.DataFrame(data1[j][i])
-                    df1.columns = ['timestamp', 'ratio']
-                    df['ratio'] = df1['ratio']
-                except:
-                    df['ratio'] = 0
-                try:
-                    lastdf = pd.read_csv('data/orders/' + periods[j] + '/' + symbols[i] + '.csv')
-                except:
-                    lastdf = df
-                lastdf = lastdf[lastdf['timestamp'] < df.iloc[0]['timestamp']]
-                df = pd.concat([lastdf, df], ignore_index=True)
-                df.to_csv('data/candles/' + periods[j] + '/' + symbols[i] + '.csv', index=False)
-        time.sleep(60)
+# https://data.binance.vision/data/futures/um/daily/metrics/1000BONKUSDT/1000BONKUSDT-metrics-2023-12-12.zip
+def get_metrics(symbol: str,
+                date: str,
+                func: Literal["metrics", "liquidationSnapshot", "trades", "aggTrades","bookDepth", "bookTicker"]
+                ) -> pd.DataFrame:
+    url = f'https://data.binance.vision/data/futures/um/daily/{func}/{symbol}/' + symbol + '-' + func + '-' + date + '.zip'
+    """download content from a url, unzip, and save to a csv file"""
+    r = requests.get(url)
+    print(url)
+    z = zipfile.ZipFile(io.BytesIO(r.content))
+    z.extractall(f'data/{func}/')
+    df = pd.read_csv(f'data/{func}/' + symbol + '-' + func + '-' + date + '.csv')
+    df.to_csv(f'data/{func}/' + symbol + '-' + func + '-' + date + '.csv')
+    # Delete the csv file
+    os.remove(f'data/{func}/' + symbol + '-' + func + '-' + date + '.csv')
+    return df
 
-pre_processing()
+def get_daily_data():
+    """get daily data from the last 30 days"""
+    today = datetime.datetime.today()
+    symbol = 'BTCUSDT'
+    func = 'metrics'
+    df = pd.DataFrame()
+    for i in range(1, 30):
+        date = today - datetime.timedelta(days=i)
+        date = date.strftime('%Y-%m-%d')
+        df1 = get_metrics(symbol, date, func)
+        # Concatenate dataframes
+        df = pd.concat([df, df1])
+    # Sort the data by the first column
+    print(df)
+    df.sort_values(by=df.columns[0], inplace=True)
+    # Write data to csv file
+    df.to_csv(f'data/{func}/' + symbol + '.csv', index=False)
+
+get_daily_data()

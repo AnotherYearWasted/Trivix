@@ -62,17 +62,14 @@ $ source .env/bin/activate
 $ python3 -m pip install -r py/requirements.txt
 ```
 
-To run NodeJS, first install required dependencies
-```bash
-$ npm i
-```
+How to download data
+In `py/getdata.py`, modified as follow:
 
-Javascript scripts are used to collect data
-Run javascript code in background
+By default, the script collects data in the previous 30 days and export to a csv file, depending on which function the user calls
+
+Run the code:
 ```bash
-$ source candles.sh
-$ source longshort.sh
-$ source liquidations.sh
+source getdata.sh
 ```
 
 ## 4. Usage
