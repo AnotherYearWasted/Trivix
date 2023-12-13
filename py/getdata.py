@@ -45,7 +45,7 @@ def get_daily_data():
     """get daily data from the last 30 days"""
     today = datetime.datetime.today()
     symbol = 'BTCUSDT'
-    func = 'metrics'
+    func = 'liquidationSnapshot'
     df = pd.DataFrame()
     for i in range(1, 30):
         date = today - datetime.timedelta(days=i)
