@@ -45,12 +45,12 @@ def get_daily_data():
     """get daily data from the last 30 days"""
     today = datetime.datetime.today()
     symbol = 'BTCUSDT'
-    func = 'liquidationSnapshot'
+    func = 'klines'
     df = pd.DataFrame()
-    for i in range(1, 30):
+    for i in range(2, 366):
         date = today - datetime.timedelta(days=i)
         date = date.strftime('%Y-%m-%d')
-        df1 = get_metrics(symbol, date, func)
+        df1 = get_klines(symbol, date, func)
         # Concatenate dataframes
         df = pd.concat([df, df1])
     # Sort the data by the first column
