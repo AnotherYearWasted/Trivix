@@ -4,7 +4,7 @@ Trivix is an ongoing project for market analysis using machine learning techniqu
 
 ## Index
 
-* [1. General infomation](#1-general-infomation)
+* [1. General information](#1-general-information)
 * [2. Structures](#2-structure)
 * [3. Installation](#3-installation)
 * [4. Usage](#4-usage)
@@ -13,7 +13,7 @@ Trivix is an ongoing project for market analysis using machine learning techniqu
 * [7. Funding](#7-funding)
 * [8. License](#8-license)
 
-## 1. General infomation
+## 1. General information
 
 Trivix is a tool for analyzing financial market data using machine learning algorithms. It offers a range of features including data import, data exploration, clustering, linear regression, and predictive modeling. The tool is designed to make it easier for users to explore and understand complex financial data, enabling them to make informed investment decisions.
 
